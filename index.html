@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NUET Prep — Critical Thinking Practice</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #18181f;
+      --border: #2a2a35;
+      --accent: #6c63ff;
+      --accent-light: #8b85ff;
+      --text: #f0f0f5;
+      --muted: #8888a0;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* ── SCREENS ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── START SCREEN ── */
+    .start-screen {
+      text-align: center;
+      padding: 60px 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(108,99,255,0.12);
+      border: 1px solid rgba(108,99,255,0.25);
+      padding: 5px 14px;
+      border-radius: 999px;
+      margin-bottom: 28px;
+    }
+
+    .start-screen h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #fff 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .start-screen p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto 40px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent-light);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover { background: var(--accent-light); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    /* ── QUIZ SCREEN ── */
+    .quiz-screen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .quiz-header {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .progress-wrap {
+      flex: 1;
+      margin-right: 20px;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .q-counter {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .quiz-body {
+      padding: 32px 28px 28px;
+    }
+
+    .topic-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(108,99,255,0.1);
+      border: 1px solid rgba(108,99,255,0.2);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .question-text {
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      text-align: left;
+    }
+
+    .option:hover:not(.disabled) {
+      border-color: var(--accent);
+      background: rgba(108,99,255,0.06);
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: rgba(108,99,255,0.1);
+    }
+
+    .option.correct {
+      border-color: var(--correct);
+      background: rgba(34,197,94,0.08);
+    }
+
+    .option.wrong {
+      border-color: var(--wrong);
+      background: rgba(239,68,68,0.08);
+    }
+
+    .option.disabled { cursor: default; }
+
+    .option-letter {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+
+    .option.selected .option-letter {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .option.correct .option-letter {
+      border-color: var(--correct);
+      background: var(--correct);
+      color: #fff;
+    }
+
+    .option.wrong .option-letter {
+      border-color: var(--wrong);
+      background: var(--wrong);
+      color: #fff;
+    }
+
+    .option-text {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--text);
+      padding-top: 3px;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .feedback.show { display: block; }
+    .feedback.correct-fb { background: rgba(34,197,94,0.1); color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+    .feedback.wrong-fb { background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+
+    .quiz-footer {
+      padding: 20px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ── RESULT SCREEN ── */
+    .result-screen {
+      text-align: center;
+      padding: 52px 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .score-ring {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 28px;
+      position: relative;
+    }
+
+    .score-ring svg { transform: rotate(-90deg); }
+
+    .score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+    .score-ring .ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease;
+    }
+
+    .score-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .score-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .result-screen h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .result-screen p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-width: 400px;
+      margin: 0 auto 32px;
+    }
+
+    .breakdown {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .breakdown h3 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.875rem;
+    }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot.c { background: var(--correct); }
+    .dot.w { background: var(--wrong); }
+
+    .btn-outline {
+      display: inline-block;
+      padding: 13px 32px;
+      background: transparent;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: border-color 0.2s;
+      margin-left: 12px;
+    }
+
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent-light); }
+
+    .footer-note {
+      margin-top: 28px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .footer-note a { color: var(--accent-light); text-decoration: none; }
+
+    @media (max-width: 520px) {
+      .stats-row { gap: 20px; }
+      .quiz-body { padding: 24px 18px 20px; }
+      .quiz-header, .quiz-footer { padding: 16px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- START -->
+  <div class="screen active" id="start-screen">
+    <div class="start-screen">
+      <div class="tag">NUET · Critical Thinking</div>
+      <h1>Think Sharp.<br>Score Higher.</h1>
+      <p>Practice real NUET-style Critical Thinking questions. Identify flaws, conclusions, and assumptions — the skills that separate top scorers.</p>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-num">5</div><div class="stat-label">Questions</div></div>
+        <div class="stat"><div class="stat-num">~8</div><div class="stat-label">Minutes</div></div>
+        <div class="stat"><div class="stat-num">CT</div><div class="stat-label">Critical Thinking</div></div>
+      </div>
+      <button class="btn" onclick="startQuiz()">Start Practice →</button>
+      <div class="footer-note">Built by <a href="#">Amir Tursynali</a> · NUET Prep MVP</div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="quiz-screen">
+    <div class="quiz-screen">
+      <div class="quiz-header">
+        <div class="progress-wrap">
+          <div class="progress-label" id="progress-label">Question 1 of 5</div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+        </div>
+        <div class="q-counter" id="q-counter">1 / 5</div>
+      </div>
+      <div class="quiz-body">
+        <div class="topic-badge" id="topic-badge">Topic</div>
+        <div class="question-text" id="question-text"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="quiz-footer">
+        <button class="btn" id="next-btn" onclick="nextQuestion()" style="display:none">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="result-screen">
+    <div class="result-screen">
+      <div class="score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"/>
+          <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52"
+            stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        </svg>
+        <div class="score-label">
+          <div class="score-num" id="score-num">0/5</div>
+          <div class="score-sub">score</div>
+        </div>
+      </div>
+      <h2 id="result-title">Well done!</h2>
+      <p id="result-msg">Here's how you performed across the questions.</p>
+      <div class="breakdown" id="breakdown"></div>
+      <button class="btn" onclick="restartQuiz()">Try Again</button>
+      <button class="btn-outline" onclick="goHome()">Home</button>
+      <div class="footer-note">More questions coming soon · <a href="#">nuetprep.kz</a></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    topic: "Critical Thinking",
+    text: `Sometimes poverty is defined in relation to average income. For example, people may be said to be poor if their income is less than 60 per cent of the average income for the population. This is not a legitimate definition, because it is a measure of inequality rather than poverty. This is obvious if we consider the consequences of using the definition. It means that a huge pay rise for middle managers automatically throws some people into poverty, even though their income has not changed. On the other hand, the definition implies that in a society where almost everyone is starving, no one is poor.\n\nWhich of the following best expresses the main conclusion of the above argument?`,
+    options: [
+      "Having a relatively low income is not the same as being poor.",
+      "It is impossible to find an appropriate definition of poverty.",
+      "It is wrong to define poverty in relation to average income.",
+      "A huge pay rise for middle managers makes other people poor.",
+      "There is no inequality in a society where most people are starving."
+    ],
+    answer: 2,
+    explanation: "The passage argues specifically against defining poverty using average income — that is the main conclusion, not the broader claim that all definitions fail."
+  },
+  {
+    topic: "Problem Solving",
+    text: `A child's bus fare is cheaper than the adult fare but is more than half the adult fare. The total cost of a single journey for an adult and two children is £1.20. Adult fares are all multiples of 10p.\n\nWhat is the adult fare?`,
+    options: ["30p", "40p", "50p", "60p", "70p"],
+    answer: 2,
+    explanation: "If adult = 50p, child must be between 25p and 50p. Try child = 35p: 50 + 35 + 35 = 120p = £1.20 ✓. No other adult fare satisfies all conditions."
+  },
+  {
+    topic: "Critical Thinking",
+    text: `Over the past ten years, there has been a four-fold increase in the number of people killed in road accidents who are found to have illegal drugs in their bodies. The rate of increase is much greater than the corresponding rate for those people killed in accidents who were found with alcohol in their blood. This shows that the campaign against drink-driving has succeeded. Consequently, the Government ought now to concentrate on targeting those people who drive whilst under the influence of illegal drugs.\n\nWhich of the following is the best statement of the flaw in the argument above?`,
+    options: [
+      "Those who take illegal drugs and drive are likely different from those who drink and drive.",
+      "Targeting drug drivers ignores people who take drugs but do not drive.",
+      "The success of the drink-driving campaign does not mean a drug campaign would succeed.",
+      "The increase in drug-related road deaths is insufficient to conclude the drink-driving campaign succeeded.",
+      "Evidence needs to distinguish between illegal and legal drugs."
+    ],
+    answer: 3,
+    explanation: "The flaw is that the argument uses the rise in drug deaths as evidence the drink-driving campaign worked — but these are separate trends. One does not prove the other."
+  },
+  {
+    topic: "Critical Thinking",
+    text: `Socialist politicians are often taunted by their opponents for leading lifestyles similar to those of their capitalist counterparts. The theme runs: 'You object on socialist principles to gross inequalities in the distribution of wealth; yet you enjoy a higher personal standard of living than the majority. Therefore you are not really a socialist.' But the jibe can easily be answered, for there is no hypocrisy in arguing, even from a privileged position, for a fairer and more equal society.\n\nWhich of the following is a conclusion which can be reliably drawn from the passage as a whole?`,
+    options: [
+      "Socialists who enjoy personal wealth cannot object to others who amass even greater wealth.",
+      "Someone can be a genuine socialist whilst enjoying a high standard of living.",
+      "Calls for reform are more effective if they come from the more privileged classes.",
+      "There is nothing immoral about inequalities in the distribution of wealth.",
+      "It is hypocritical to claim to be a socialist if one enjoys an above-average standard of living."
+    ],
+    answer: 1,
+    explanation: "The passage directly refutes the idea that personal wealth disqualifies someone from being a socialist — so B follows reliably from the argument."
+  },
+  {
+    topic: "Critical Thinking",
+    text: `The Executive of the Students' Union recently carried out a survey to identify dangerous areas on campus. This led to improved lighting in suspect areas. Such reforms can only help reduce the number of attacks on campus.\n\nHowever, the University lake was not included in the survey as it belongs to the City Council. This means the University has no direct influence over safety standards there. It should therefore definitely be avoided by lone students at night.\n\nWhich one of the following is an underlying assumption of this argument?`,
+    options: [
+      "Students do not look after their own safety but rely on others to take measures on their behalf.",
+      "The City Council regards the lake area as part of the campus.",
+      "Students walking on and off campus at night would go via the university lake.",
+      "The safety measures taken by the City Council are either non-existent or inferior to those implemented by the Student Union.",
+      "The Student Union is not merely seeking popularity but is genuinely concerned about safety risks."
+    ],
+    answer: 3,
+    explanation: "The argument assumes the lake is less safe because the University can't control it — this only works if we assume Council measures are absent or inferior. Without this assumption, the conclusion doesn't follow."
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+let results = [];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  current = 0; score = 0; answered = false; results = [];
+  showScreen('quiz-screen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  document.getElementById('topic-badge').textContent = q.topic;
+  document.getElementById('question-text').textContent = q.text;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('q-counter').textContent = `${current + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  document.getElementById('next-btn').style.display = 'none';
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D','E'];
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span class="option-text">${opt}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const opts = document.querySelectorAll('.option');
+  const fb = document.getElementById('feedback');
+
+  opts.forEach(o => o.classList.add('disabled'));
+  opts[idx].classList.add('selected');
+
+  if (idx === q.answer) {
+    score++;
+    opts[idx].classList.add('correct');
+    fb.className = 'feedback correct-fb show';
+    fb.textContent = '✓ Correct. ' + q.explanation;
+    results.push({ q: current, correct: true });
+  } else {
+    opts[idx].classList.add('wrong');
+    opts[q.answer].classList.add('correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.textContent = '✗ Incorrect. ' + q.explanation;
+    results.push({ q: current, correct: false });
+  }
+
+  document.getElementById('next-btn').style.display = 'inline-block';
+  if (current === questions.length - 1) {
+    document.getElementById('next-btn').textContent = 'See Results →';
+  }
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('result-screen');
+
+  const pct = score / questions.length;
+  const circumference = 326.7;
+  const offset = circumference - (pct * circumference);
+
+  setTimeout(() => {
+    document.getElementById('ring-fill').style.strokeDashoffset = offset;
+  }, 100);
+
+  document.getElementById('score-num').textContent = `${score}/${questions.length}`;
+
+  let title, msg;
+  if (pct === 1) { title = "Perfect score! 🎯"; msg = "Outstanding. You're ready for NUET Critical Thinking."; }
+  else if (pct >= 0.8) { title = "Strong result ✓"; msg = "You're close to top performance. Review any missed questions carefully."; }
+  else if (pct >= 0.6) { title = "Good progress"; msg = "Solid foundation. Focus on argument structure and assumptions."; }
+  else { title = "Keep practising"; msg = "NUET Critical Thinking takes practice. Review the explanations and try again."; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-msg').textContent = msg;
+
+  const breakdown = document.getElementById('breakdown');
+  breakdown.innerHTML = '<h3>Question Breakdown</h3>';
+  results.forEach((r, i) => {
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    row.innerHTML = `<span class="dot ${r.correct ? 'c' : 'w'}"></span><span>Question ${i + 1} — ${r.correct ? 'Correct' : 'Incorrect'}</span>`;
+    breakdown.appendChild(row);
+  });
+}
+
+function restartQuiz() { startQuiz(); }
+function goHome() { showScreen('start-screen'); }
+</script>
+</body>
+</html>
